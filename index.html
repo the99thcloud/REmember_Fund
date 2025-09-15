@@ -60,6 +60,21 @@
         .amount-detail { display: none; }
         /* Show amount details when the container has the 'show-details' class */
         .show-details .amount-detail { display: inline; }
+
+        /* Responsive styles for mobile */
+        @media (max-width: 640px) {
+            .milestone-label {
+                font-size: 0.75rem; /* Smaller font on mobile */
+                white-space: normal; /* Allow text to wrap */
+            }
+            #milestone1 .milestone-label, #milestone3 .milestone-label {
+                bottom: auto; /* Reset bottom position */
+                top: -2.5rem; /* Position above the line */
+            }
+            .milestone-container {
+                margin-top: 2rem; /* Add margin to prevent overlap with title */
+            }
+        }
     </style>
 </head>
 <body id="page-container">
@@ -135,8 +150,8 @@
                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                 </button>
                 <h2 class="text-xl font-semibold text-gray-700 mb-12 text-center">集資里程碑</h2>
-                <div class="px-8">
-                    <div class="relative w-full h-16">
+                <div class="px-4 md:px-8 milestone-container">
+                    <div class="relative w-full h-24">
                         <div class="absolute top-1/2 -translate-y-1/2 w-full h-2 bg-gray-200 rounded-full"></div>
                         <div id="timeline-progress-bar" class="absolute top-1/2 -translate-y-1/2 h-2 bg-[#49c49e] rounded-full"></div>
                         
@@ -244,6 +259,9 @@
             if (overallPercentage >= milestonePercentage) {
                 milestoneDot.className = 'milestone-dot bg-[#49c49e] border-2 border-[#3ba88e]';
                 milestoneDot.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            } else {
+                milestoneDot.className = 'milestone-dot bg-white border-2 border-gray-300';
+                milestoneDot.innerHTML = '';
             }
         }
 
@@ -268,5 +286,4 @@
     </script>
 </body>
 </html>
-
 
