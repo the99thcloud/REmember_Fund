@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RESCENE 應援集資進度</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+        }
+        .main-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+        .chart-section {
+            position: relative;
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            border: 1px solid #f1f5f9;
+        }
+        .download-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            color: #64748b;
+            padding: 0.25rem;
+            border-radius: 9999px;
+            transition: all 0.2s ease;
+            opacity: 0.7;
+        }
+        .download-btn:hover {
+            background-color: #e2e8f0;
+            color: #334155;
+            opacity: 1;
+        }
+        .progress-bar-bg { background-color: #e5e7eb; border-radius: 9999px; overflow: hidden; height: 1.25rem; }
+        .progress-bar-fg { background-color: #49c49e; height: 100%; border-radius: 9999px; transition: width 0.5s ease-in-out; }
+        .status-badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.875rem; font-weight: 500; }
+        .status-complete { background-color: #d1fae5; color: #065f46; }
+        .status-inprogress { background-color: #dbeafe; color: #1e40af; }
+        .status-pending { background-color: #e5e7eb; color: #4b5563; }
+        .milestone-dot { width: 1.25rem; height: 1.25rem; border-radius: 9999px; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+        .milestone-label { position: absolute; bottom: -2.5rem; left: 50%; transform: translateX(-50%); text-align: center; font-size: 0.875rem; color: #4b5563; white-space: nowrap; }
+        
+        /* Toggle Switch Styles */
+        .toggle-label { cursor: pointer; padding: 0.25rem 0.75rem; border-radius: 0.375rem; transition: background-color 0.2s; }
+        input[type="radio"]:checked + .toggle-label { background-color: #49c49e; color: white; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); }
+        input[type="radio"] { display: none; }
+        
+        /* Hide amount details by default */
+        .amount-detail { display: none; }
+        /* Show amount details when the container has the 'show-details' class */
+        .show-details .amount-detail { display: inline; }
+    </style>
+</head>
+<body id="page-container">
+    <div class="main-container">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-800">RESCENE FAN-CON 應援集資進度</h1>
+            <p class="text-gray-500 mt-2">REmember - 台灣場應援團隊</p>
+        </header>
+
+        <!-- View Toggle Switch -->
+        <div class="flex justify-center items-center mb-6 p-1 bg-gray-200 rounded-lg max-w-xs mx-auto">
+            <input type="radio" id="percent-view" name="view-toggle" checked>
+            <label for="percent-view" class="toggle-label flex-1 text-center font-medium text-gray-600">顯示 %</label>
+            
+            <input type="radio" id="details-view" name="view-toggle">
+            <label for="details-view" class="toggle-label flex-1 text-center font-medium text-gray-600">詳細金額</label>
+        </div>
+
+        <div class="space-y-6">
+            <!-- Overall Progress -->
+            <section id="overall-section" class="chart-section">
+                <button onclick="downloadSection('overall-section', 'rescene-overall-progress.png')" class="download-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                </button>
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">總進度</h2>
+                <div class="flex justify-between items-center mb-1 text-gray-600 font-medium text-sm">
+                    <span class="amount-detail" id="current-total-text"></span>
+                    <span class="amount-detail" id="total-goal-text"></span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div id="overall-progress-bar" class="progress-bar-fg"></div>
+                </div>
+                <div class="text-right mt-2 text-lg font-bold text-[#49c49e]" id="overall-percentage-text">0%</div>
+            </section>
+
+            <!-- Phase Breakdown -->
+            <section id="phases-section" class="chart-section">
+                <button onclick="downloadSection('phases-section', 'rescene-phases-status.png')" class="download-btn">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                </button>
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">各階段狀態</h2>
+                <div class="space-y-4">
+                    <!-- Phase 1 -->
+                    <div>
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-semibold text-gray-800">第一階段：核心現場應援 <span class="amount-detail text-xs font-normal text-gray-500" id="phase1-goal-text"></span></h3>
+                            <span id="phase1-status" class="status-badge"></span>
+                        </div>
+                        <div class="progress-bar-bg mt-2"><div id="phase1-progress-bar" class="progress-bar-fg"></div></div>
+                    </div>
+                     <!-- Phase 2 -->
+                    <div>
+                        <div class="flex justify-between items-center">
+                             <h3 class="font-semibold text-gray-800">第二階段：後台獻禮 <span class="amount-detail text-xs font-normal text-gray-500" id="phase2-goal-text"></span></h3>
+                            <span id="phase2-status" class="status-badge"></span>
+                        </div>
+                        <div class="progress-bar-bg mt-2"><div id="phase2-progress-bar" class="progress-bar-fg"></div></div>
+                    </div>
+                     <!-- Phase 3 -->
+                    <div>
+                        <div class="flex justify-between items-center">
+                             <h3 class="font-semibold text-gray-800">第三階段：後台餐飲應援 <span class="amount-detail text-xs font-normal text-gray-500" id="phase3-goal-text"></span></h3>
+                            <span id="phase3-status" class="status-badge"></span>
+                        </div>
+                        <div class="progress-bar-bg mt-2"><div id="phase3-progress-bar" class="progress-bar-fg"></div></div>
+                    </div>
+                </div>
+            </section>
+
+             <!-- Timeline Visualization -->
+            <section id="milestone-section" class="chart-section">
+                 <button onclick="downloadSection('milestone-section', 'rescene-milestone-progress.png')" class="download-btn">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                </button>
+                <h2 class="text-xl font-semibold text-gray-700 mb-12 text-center">集資里程碑</h2>
+                <div class="px-8">
+                    <div class="relative w-full h-16">
+                        <div class="absolute top-1/2 -translate-y-1/2 w-full h-2 bg-gray-200 rounded-full"></div>
+                        <div id="timeline-progress-bar" class="absolute top-1/2 -translate-y-1/2 h-2 bg-[#49c49e] rounded-full"></div>
+                        
+                        <!-- Current Progress Marker -->
+                        <div id="current-progress-marker" class="absolute top-1/2 -translate-y-full -translate-x-1/2 transition-all duration-500" style="padding-bottom: 8px;">
+                            <span class="block text-center text-sm font-bold text-[#49c49e]" id="current-progress-label"></span>
+                            <div class="w-0.5 h-2 bg-[#49c49e] mx-auto"></div>
+                        </div>
+
+                        <!-- Milestones -->
+                        <div id="milestone1" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"><div class="milestone-dot bg-white border-2 border-gray-300"></div><span class="milestone-label">第一階段<br><span class="text-xs font-semibold" id="milestone1-percent-label"></span></span></div>
+                        <div id="milestone2" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"><div class="milestone-dot bg-white border-2 border-gray-300"></div><span class="milestone-label">第二階段<br><span class="text-xs font-semibold" id="milestone2-percent-label"></span></span></div>
+                        <div id="milestone3" class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2" style="left: 100%;"><div class="milestone-dot bg-white border-2 border-gray-300"></div><span class="milestone-label">最終目標<br><span class="text-xs font-semibold">(100%)</span></span></div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        const data = { currentTotal: 8328, goals: { phase1: 6600, phase2: 4050, phase3: 11000 } };
+        const totalGoal = data.goals.phase1 + data.goals.phase2 + data.goals.phase3;
+        const formatCurrency = (num) => `NT$${num.toLocaleString()}`;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const pageContainer = document.getElementById('page-container');
+            const percentViewRadio = document.getElementById('percent-view');
+            const detailsViewRadio = document.getElementById('details-view');
+
+            function updateDisplay() {
+                const overallPercentage = (data.currentTotal / totalGoal) * 100;
+                let remainingForPhases = data.currentTotal;
+                
+                const phase1Progress = Math.min(remainingForPhases, data.goals.phase1);
+                const phase1Percentage = (phase1Progress / data.goals.phase1) * 100;
+                remainingForPhases -= phase1Progress;
+                
+                const phase2Progress = Math.min(remainingForPhases, data.goals.phase2);
+                const phase2Percentage = (phase2Progress / data.goals.phase2) * 100;
+                remainingForPhases -= phase2Progress;
+
+                const phase3Progress = Math.min(remainingForPhases, data.goals.phase3);
+                const phase3Percentage = (phase3Progress / data.goals.phase3) * 100;
+
+                // Overall section
+                document.getElementById('current-total-text').textContent = formatCurrency(data.currentTotal);
+                document.getElementById('total-goal-text').textContent = formatCurrency(totalGoal);
+                document.getElementById('overall-percentage-text').textContent = `${overallPercentage.toFixed(2)}%`;
+                document.getElementById('overall-progress-bar').style.width = `${overallPercentage}%`;
+                
+                // Phases section
+                document.getElementById('phase1-goal-text').textContent = `(目標: ${formatCurrency(data.goals.phase1)})`;
+                document.getElementById('phase1-progress-bar').style.width = `${phase1Percentage}%`;
+                updateStatus('phase1-status', phase1Percentage);
+
+                document.getElementById('phase2-goal-text').textContent = `(目標: ${formatCurrency(data.goals.phase2)})`;
+                document.getElementById('phase2-progress-bar').style.width = `${phase2Percentage}%`;
+                updateStatus('phase2-status', phase2Percentage);
+                
+                document.getElementById('phase3-goal-text').textContent = `(目標: ${formatCurrency(data.goals.phase3)})`;
+                document.getElementById('phase3-progress-bar').style.width = `${phase3Percentage}%`;
+                updateStatus('phase3-status', phase3Percentage);
+
+                // Milestone section
+                const milestone1_pos_percent = (data.goals.phase1 / totalGoal) * 100;
+                const milestone2_pos_percent = ((data.goals.phase1 + data.goals.phase2) / totalGoal) * 100;
+                document.getElementById('timeline-progress-bar').style.width = `${overallPercentage}%`;
+                document.getElementById('milestone1').style.left = `${milestone1_pos_percent}%`;
+                document.getElementById('milestone2').style.left = `${milestone2_pos_percent}%`;
+                document.getElementById('milestone1-percent-label').textContent = `(${milestone1_pos_percent.toFixed(1)}%)`;
+                document.getElementById('milestone2-percent-label').textContent = `(${milestone2_pos_percent.toFixed(1)}%)`;
+                
+                document.getElementById('current-progress-marker').style.left = `${Math.min(overallPercentage, 100)}%`;
+                document.getElementById('current-progress-label').textContent = `${overallPercentage.toFixed(1)}%`;
+
+
+                updateMilestone('milestone1', milestone1_pos_percent, overallPercentage);
+                updateMilestone('milestone2', milestone2_pos_percent, overallPercentage);
+                updateMilestone('milestone3', 100, overallPercentage);
+            }
+
+            function handleViewChange() {
+                if (detailsViewRadio.checked) {
+                    pageContainer.classList.add('show-details');
+                } else {
+                    pageContainer.classList.remove('show-details');
+                }
+            }
+            
+            percentViewRadio.addEventListener('change', handleViewChange);
+            detailsViewRadio.addEventListener('change', handleViewChange);
+
+            updateDisplay();
+        });
+
+        function updateStatus(elementId, percentage) {
+            const el = document.getElementById(elementId);
+            if (percentage >= 100) { el.textContent = '已達成'; el.className = 'status-badge status-complete'; } 
+            else if (percentage > 0) { el.textContent = '進行中'; el.className = 'status-badge status-inprogress'; } 
+            else { el.textContent = '未開始'; el.className = 'status-badge status-pending'; }
+        }
+        
+        function updateMilestone(milestoneId, milestonePercentage, overallPercentage) {
+            const milestoneDot = document.getElementById(milestoneId).querySelector('.milestone-dot');
+            if (overallPercentage >= milestonePercentage) {
+                milestoneDot.className = 'milestone-dot bg-[#49c49e] border-2 border-[#3ba88e]';
+                milestoneDot.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            }
+        }
+
+        function downloadSection(elementId, filename) {
+            const section = document.getElementById(elementId);
+            const downloadButton = section.querySelector('.download-btn');
+            
+            if(downloadButton) downloadButton.style.display = 'none';
+
+            html2canvas(section, { backgroundColor: '#ffffff', scale: 2 })
+                .then(canvas => {
+                    const link = document.createElement('a');
+                    link.download = filename;
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                    if(downloadButton) downloadButton.style.display = 'block';
+                }).catch(err => {
+                    console.error('下載圖表時發生錯誤:', err);
+                    if(downloadButton) downloadButton.style.display = 'block';
+                });
+        }
+    </script>
+</body>
+</html>
+
+
