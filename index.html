@@ -66,13 +66,19 @@
             .milestone-label {
                 font-size: 0.75rem; /* Smaller font on mobile */
                 white-space: normal; /* Allow text to wrap */
+                line-height: 1.2;
             }
             #milestone1 .milestone-label, #milestone3 .milestone-label {
                 bottom: auto; /* Reset bottom position */
-                top: -2.5rem; /* Position above the line */
+                top: -2.8rem; /* Position above the line */
+            }
+             #milestone2 .milestone-label {
+                top: auto; /* Reset top position */
+                bottom: -2.8rem; /* Position below the line */
             }
             .milestone-container {
                 margin-top: 2rem; /* Add margin to prevent overlap with title */
+                margin-bottom: 1rem;
             }
         }
     </style>
