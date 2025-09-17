@@ -185,12 +185,100 @@
                     </div>
                 </div>
             </section>
+
+            <!-- Breakdown Details -->
+            <section id="breakdown-section" class="chart-section">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">金額細估與階段式募資</h2>
+                <div class="space-y-6 text-gray-700 text-sm leading-relaxed">
+                    <p>為確保計畫執行順利並提高資金運用的透明度，我們將募資分為三階段。以場館人數500人為基礎進行初步估算：</p>
+                    
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">第一階段：核心現場應援 (目標估算：NT$ 6,600)</h3>
+                        <p class="pl-4 border-l-2 border-gray-200 text-gray-600">此階段為必要應援項目，確保所有入場粉絲都能參與。</p>
+                        <ul class="list-disc pl-9 mt-2 space-y-1 text-gray-600">
+                            <li>全場手幅 (估算600份) = NT$ 6,000</li>
+                            <li>綠色玻璃紙 (數張) = NT$ 100</li>
+                            <li>行政與雜支 (包裝、交通、預備金等) = NT$ 500</li>
+                        </ul>
+                    </div>
+            
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">第二階段：後台獻禮 (目標估算：NT$ 4,050)</h3>
+                        <p class="pl-4 border-l-2 border-gray-200 text-gray-600">第一階段達標後開啟，為藝人與韓方工作人員（約40位）準備台灣特色點心與飲品。</p>
+                         <ul class="list-disc pl-9 mt-2 space-y-1 text-gray-600">
+                            <li>台灣特色零食: NT$ 1,250</li>
+                            <li>手搖飲品 (40杯 x NT$ 70/杯): NT$ 2,800</li>
+                        </ul>
+                    </div>
+            
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">第三階段：後台餐飲應援 (目標估算：NT$ 11,000)</h3>
+                        <p class="pl-4 border-l-2 border-gray-200 text-gray-600">第二階段達標後開啟，旨在提供更完善的支持與感謝。</p>
+                         <ul class="list-disc pl-9 mt-2 space-y-1 text-gray-600">
+                            <li>後台台灣特色餐點 (預算) = NT$ 10,000</li>
+                            <li>追加雜支 (包裝、交通、預備金等) = NT$ 1,000</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="pt-4 mt-4 border-t border-gray-200">
+                         <p class="text-xs text-gray-500">*所有款項將公開透明，並於活動結束後公布詳細財報。集資若有餘額，將全數以RESCENE名義捐贈予公益團體，或保留至下次專場使用，屆時會再進行公告與投票。</p>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
     <script>
-        const data = { currentTotal: 11518, goals: { phase1: 6600, phase2: 4050, phase3: 11000 } };
-        const totalGoal = data.goals.phase1 + data.goals.phase2 + data.goals.phase3;
+        // --- START: CONFIGURATION & NEW LOGIC ---
+
+        // PART 1: 手動更新區 (手動更新以下數字)
+        // ----------------------------------------------------
+
+        // 總集資金額 (毛額) - 這是為了預覽效果的範例數字
+        const grossAmount = 10000; 
+
+        // 各階段應援的目標金額 - 已根據您提供的資訊更新
+        const projectGoals = { 
+            phase1: 6600, 
+            phase2: 4050, 
+            phase3: 11000 
+        };
+
+        // 各項集資禮的「單位成本」
+        const giftCosts = {
+            fragrance: 36,
+            scene: 75,
+            bloom: 164,
+            eternal: 323
+        };
+
+        // 各項集資禮的「總銷售數量」- 這是為了預覽效果的範例數字
+        const giftCounts = {
+            fragrance: 10,
+            scene: 15,
+            bloom: 5,
+            eternal: 2
+        };
+
+
+        // PART 2: 自動計算區 (請勿修改以下邏輯)
+        // ----------------------------------------------------
+        
+        // 計算最終總目標金額
+        const targetAmount = projectGoals.phase1 + projectGoals.phase2 + projectGoals.phase3;
+
+        // 計算集資禮總成本 (totalGiftCost)
+        const totalGiftCost = (giftCosts.fragrance * giftCounts.fragrance) + 
+                              (giftCosts.scene * giftCounts.scene) + 
+                              (giftCosts.bloom * giftCounts.bloom) + 
+                              (giftCosts.eternal * giftCounts.eternal);
+
+        // 計算實際可動用資金 (淨額)
+        const netAmount = grossAmount - totalGiftCost;
+
+        // --- END: CONFIGURATION & NEW LOGIC ---
+
+
         const formatCurrency = (num) => `NT$${num.toLocaleString()}`;
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -199,55 +287,61 @@
             const detailsViewRadio = document.getElementById('details-view');
 
             function updateDisplay() {
-                const overallPercentage = (data.currentTotal / totalGoal) * 100;
-                let remainingForPhases = data.currentTotal;
+                // *** 核心修改：進度條百分比的計算，從 grossAmount 改為 netAmount ***
+                const progressPercentage = (netAmount / targetAmount) * 100;
                 
-                const phase1Progress = Math.min(remainingForPhases, data.goals.phase1);
-                const phase1Percentage = (phase1Progress / data.goals.phase1) * 100;
+                // 各階段進度計算也使用 netAmount
+                let remainingForPhases = netAmount;
+                
+                const phase1Progress = Math.min(Math.max(0, remainingForPhases), projectGoals.phase1);
+                const phase1Percentage = (phase1Progress / projectGoals.phase1) * 100;
                 remainingForPhases -= phase1Progress;
                 
-                const phase2Progress = Math.min(remainingForPhases, data.goals.phase2);
-                const phase2Percentage = (phase2Progress / data.goals.phase2) * 100;
+                const phase2Progress = Math.min(Math.max(0, remainingForPhases), projectGoals.phase2);
+                const phase2Percentage = (phase2Progress / projectGoals.phase2) * 100;
                 remainingForPhases -= phase2Progress;
 
-                const phase3Progress = Math.min(remainingForPhases, data.goals.phase3);
-                const phase3Percentage = (phase3Progress / data.goals.phase3) * 100;
+                const phase3Progress = Math.min(Math.max(0, remainingForPhases), projectGoals.phase3);
+                const phase3Percentage = (phase3Progress / projectGoals.phase3) * 100;
 
-                // Overall section
-                document.getElementById('current-total-text').textContent = formatCurrency(data.currentTotal);
-                document.getElementById('total-goal-text').textContent = formatCurrency(totalGoal);
-                document.getElementById('overall-percentage-text').textContent = `${overallPercentage.toFixed(2)}%`;
-                document.getElementById('overall-progress-bar').style.width = `${overallPercentage}%`;
+                // --- 更新頁面顯示 ---
+
+                // 總進度區
+                // 頁面顯示的當前總額維持顯示 grossAmount
+                document.getElementById('current-total-text').textContent = formatCurrency(grossAmount); 
+                document.getElementById('total-goal-text').textContent = formatCurrency(targetAmount);
+                // 但進度條和百分比使用 netAmount 計算的結果
+                document.getElementById('overall-percentage-text').textContent = `${progressPercentage.toFixed(2)}%`;
+                document.getElementById('overall-progress-bar').style.width = `${Math.max(0, progressPercentage)}%`;
                 
-                // Phases section
-                document.getElementById('phase1-goal-text').textContent = `(目標: ${formatCurrency(data.goals.phase1)})`;
+                // 各階段狀態區
+                document.getElementById('phase1-goal-text').textContent = `(目標: ${formatCurrency(projectGoals.phase1)})`;
                 document.getElementById('phase1-progress-bar').style.width = `${phase1Percentage}%`;
                 updateStatus('phase1-status', phase1Percentage);
 
-                document.getElementById('phase2-goal-text').textContent = `(目標: ${formatCurrency(data.goals.phase2)})`;
+                document.getElementById('phase2-goal-text').textContent = `(目標: ${formatCurrency(projectGoals.phase2)})`;
                 document.getElementById('phase2-progress-bar').style.width = `${phase2Percentage}%`;
                 updateStatus('phase2-status', phase2Percentage);
                 
-                document.getElementById('phase3-goal-text').textContent = `(目標: ${formatCurrency(data.goals.phase3)})`;
+                document.getElementById('phase3-goal-text').textContent = `(目標: ${formatCurrency(projectGoals.phase3)})`;
                 document.getElementById('phase3-progress-bar').style.width = `${phase3Percentage}%`;
                 updateStatus('phase3-status', phase3Percentage);
 
-                // Milestone section
-                const milestone1_pos_percent = (data.goals.phase1 / totalGoal) * 100;
-                const milestone2_pos_percent = ((data.goals.phase1 + data.goals.phase2) / totalGoal) * 100;
-                document.getElementById('timeline-progress-bar').style.width = `${overallPercentage}%`;
+                // 里程碑視覺化區
+                const milestone1_pos_percent = (projectGoals.phase1 / targetAmount) * 100;
+                const milestone2_pos_percent = ((projectGoals.phase1 + projectGoals.phase2) / targetAmount) * 100;
+                document.getElementById('timeline-progress-bar').style.width = `${Math.max(0, progressPercentage)}%`;
                 document.getElementById('milestone1').style.left = `${milestone1_pos_percent}%`;
                 document.getElementById('milestone2').style.left = `${milestone2_pos_percent}%`;
                 document.getElementById('milestone1-percent-label').textContent = `(${milestone1_pos_percent.toFixed(1)}%)`;
                 document.getElementById('milestone2-percent-label').textContent = `(${milestone2_pos_percent.toFixed(1)}%)`;
                 
-                document.getElementById('current-progress-marker').style.left = `${Math.min(overallPercentage, 100)}%`;
-                document.getElementById('current-progress-label').textContent = `${overallPercentage.toFixed(1)}%`;
+                document.getElementById('current-progress-marker').style.left = `${Math.min(Math.max(0, progressPercentage), 100)}%`;
+                document.getElementById('current-progress-label').textContent = `${progressPercentage.toFixed(1)}%`;
 
-
-                updateMilestone('milestone1', milestone1_pos_percent, overallPercentage);
-                updateMilestone('milestone2', milestone2_pos_percent, overallPercentage);
-                updateMilestone('milestone3', 100, overallPercentage);
+                updateMilestone('milestone1', milestone1_pos_percent, progressPercentage);
+                updateMilestone('milestone2', milestone2_pos_percent, progressPercentage);
+                updateMilestone('milestone3', 100, progressPercentage);
             }
 
             function handleViewChange() {
@@ -286,17 +380,15 @@
             const section = document.getElementById(elementId);
             const downloadButton = section.querySelector('.download-btn');
             
-            // --- FIX FOR html2canvas RENDERING ---
             const milestoneLabels = section.querySelectorAll('.milestone-label');
             const originalStyles = [];
             if (milestoneLabels.length > 0) {
                 milestoneLabels.forEach(label => {
-                    originalStyles.push(label.style.cssText); // Save original style
+                    originalStyles.push(label.style.cssText);
                     label.style.bottom = 'auto';
                     label.style.top = '1rem';
                 });
             }
-            // --- END FIX ---
             
             if(downloadButton) downloadButton.style.display = 'none';
 
@@ -311,14 +403,12 @@
                     console.error('下載圖表時發生錯誤:', err);
                 })
                 .finally(() => {
-                    // --- RESTORE STYLES ---
                     if (milestoneLabels.length > 0) {
                         milestoneLabels.forEach((label, index) => {
-                            label.style.cssText = originalStyles[index]; // Restore original style
+                            label.style.cssText = originalStyles[index];
                         });
                     }
                     if(downloadButton) downloadButton.style.display = 'block';
-                    // --- END RESTORE ---
                 });
         }
     </script>
