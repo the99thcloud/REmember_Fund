@@ -107,7 +107,7 @@
                 <button onclick="downloadSection('overall-section', 'rescene-overall-progress.png')" class="download-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
                 </button>
-                <h2 class="text-xl font-semibold text-gray-700 mb-2">總進度</h2>
+                <h2 class="text-xl font-semibold text-gray-700 mb-2">總進度 (以淨額計算)</h2>
                 <div class="flex justify-between items-center mb-1 text-gray-600 font-medium text-sm">
                     <span class="amount-detail" id="current-total-text"></span>
                     <span class="amount-detail" id="total-goal-text"></span>
@@ -234,8 +234,8 @@
         // PART 1: 手動更新區 (手動更新以下數字)
         // ----------------------------------------------------
 
-        // 總集資金額 (毛額) - 這是為了預覽效果的範例數字
-        const grossAmount = 10000; 
+        // 總集資金額 (毛額) - 根據您提供的資料更新
+        const grossAmount = 11564; 
 
         // 各階段應援的目標金額 - 已根據您提供的資訊更新
         const projectGoals = { 
@@ -246,18 +246,18 @@
 
         // 各項集資禮的「單位成本」
         const giftCosts = {
-            fragrance: 36,
-            scene: 75,
-            bloom: 164,
-            eternal: 323
+            fragrance: 36,    // 初見香氣組
+            scene: 75,        // 回憶場景組
+            bloom: 164,       // 綻放花途組
+            eternal: 323      // 永恆RE:member組
         };
 
-        // 各項集資禮的「總銷售數量」- 這是為了預覽效果的範例數字
+        // 各項集資禮的「總銷售數量」- 根據您提供的資料更新
         const giftCounts = {
-            fragrance: 10,
-            scene: 15,
-            bloom: 5,
-            eternal: 2
+            fragrance: 2,
+            scene: 3,
+            bloom: 4,
+            eternal: 6
         };
 
 
@@ -279,7 +279,7 @@
         // --- END: CONFIGURATION & NEW LOGIC ---
 
 
-        const formatCurrency = (num) => `NT$${num.toLocaleString()}`;
+        const formatCurrency = (num) => `NT$${Math.floor(num).toLocaleString()}`;
 
         document.addEventListener('DOMContentLoaded', () => {
             const pageContainer = document.getElementById('page-container');
@@ -307,10 +307,10 @@
                 // --- 更新頁面顯示 ---
 
                 // 總進度區
-                // 頁面顯示的當前總額維持顯示 grossAmount
-                document.getElementById('current-total-text').textContent = formatCurrency(grossAmount); 
+                // 頁面顯示的當前總額，現在改為顯示 netAmount (淨額)
+                document.getElementById('current-total-text').textContent = formatCurrency(netAmount); 
                 document.getElementById('total-goal-text').textContent = formatCurrency(targetAmount);
-                // 但進度條和百分比使用 netAmount 計算的結果
+                // 進度條和百分比同樣使用 netAmount (扣除成本後) 計算的結果
                 document.getElementById('overall-percentage-text').textContent = `${progressPercentage.toFixed(2)}%`;
                 document.getElementById('overall-progress-bar').style.width = `${Math.max(0, progressPercentage)}%`;
                 
