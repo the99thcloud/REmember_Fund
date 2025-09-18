@@ -229,69 +229,37 @@
     </div>
 
     <script>
-        // --- START: CONFIGURATION & NEW LOGIC ---
+        // --- START: CONFIGURATION ---
 
-        // PART 1: 手動更新區 (手動更新以下數字)
+        // PART 1: 手動更新區 (每次更新只需要修改這個數字)
         // ----------------------------------------------------
+        
+        const currentNetAmount = 8617; // <--- 在這裡更新最新的淨額
 
-        // 總集資金額 (毛額) - 根據您提供的資料更新
-        const grossAmount = 11564; 
-
-        // 各階段應援的目標金額 - 已根據您提供的資訊更新
+        // PART 2: 固定設定區 (通常不需要修改)
+        // ----------------------------------------------------
         const projectGoals = { 
             phase1: 6600, 
             phase2: 4050, 
             phase3: 11000 
         };
 
-        // 各項集資禮的「單位成本」
-        const giftCosts = {
-            fragrance: 36,    // 初見香氣組
-            scene: 75,        // 回憶場景組
-            bloom: 164,       // 綻放花途組
-            eternal: 323      // 永恆RE:member組
-        };
-
-        // 各項集資禮的「總銷售數量」- 根據您提供的資料更新
-        const giftCounts = {
-            fragrance: 2,
-            scene: 3,
-            bloom: 4,
-            eternal: 6
-        };
+        // --- END: CONFIGURATION ---
 
 
-        // PART 2: 自動計算區 (請勿修改以下邏輯)
-        // ----------------------------------------------------
-        
-        // 計算最終總目標金額
-        const targetAmount = projectGoals.phase1 + projectGoals.phase2 + projectGoals.phase3;
-
-        // 計算集資禮總成本 (totalGiftCost)
-        const totalGiftCost = (giftCosts.fragrance * giftCounts.fragrance) + 
-                              (giftCosts.scene * giftCounts.scene) + 
-                              (giftCosts.bloom * giftCounts.bloom) + 
-                              (giftCosts.eternal * giftCounts.eternal);
-
-        // 計算實際可動用資金 (淨額)
-        const netAmount = grossAmount - totalGiftCost;
-
-        // --- END: CONFIGURATION & NEW LOGIC ---
-
-
-        const formatCurrency = (num) => `NT$${Math.floor(num).toLocaleString()}`;
+        const formatCurrency = (num) => `NT$${Math.round(num).toLocaleString()}`;
 
         document.addEventListener('DOMContentLoaded', () => {
             const pageContainer = document.getElementById('page-container');
             const percentViewRadio = document.getElementById('percent-view');
             const detailsViewRadio = document.getElementById('details-view');
 
+            const targetAmount = projectGoals.phase1 + projectGoals.phase2 + projectGoals.phase3;
+
             function updateDisplay() {
-                // *** 核心修改：進度條百分比的計算，從 grossAmount 改為 netAmount ***
-                const progressPercentage = (netAmount / targetAmount) * 100;
+                const progressPercentage = (currentNetAmount / targetAmount) * 100;
                 
-                // 各階段進度計算也使用 netAmount
-                let remainingForPhases = netAmount;
+                let remainingForPhases = currentNetAmount;
                 
                 const phase1Progress = Math.min(Math.max(0, remainingForPhases), projectGoals.phase1);
                 const phase1Percentage = (phase1Progress / projectGoals.phase1) * 100;
@@ -305,16 +273,11 @@
                 const phase3Percentage = (phase3Progress / projectGoals.phase3) * 100;
 
                 // --- 更新頁面顯示 ---
-
-                // 總進度區
-                // 頁面顯示的當前總額，現在改為顯示 netAmount (淨額)
-                document.getElementById('current-total-text').textContent = formatCurrency(netAmount); 
+                document.getElementById('current-total-text').textContent = formatCurrency(currentNetAmount); 
                 document.getElementById('total-goal-text').textContent = formatCurrency(targetAmount);
-                // 進度條和百分比同樣使用 netAmount (扣除成本後) 計算的結果
                 document.getElementById('overall-percentage-text').textContent = `${progressPercentage.toFixed(2)}%`;
                 document.getElementById('overall-progress-bar').style.width = `${Math.max(0, progressPercentage)}%`;
                 
-                // 各階段狀態區
                 document.getElementById('phase1-goal-text').textContent = `(目標: ${formatCurrency(projectGoals.phase1)})`;
                 document.getElementById('phase1-progress-bar').style.width = `${phase1Percentage}%`;
                 updateStatus('phase1-status', phase1Percentage);
@@ -327,7 +290,6 @@
                 document.getElementById('phase3-progress-bar').style.width = `${phase3Percentage}%`;
                 updateStatus('phase3-status', phase3Percentage);
 
-                // 里程碑視覺化區
                 const milestone1_pos_percent = (projectGoals.phase1 / targetAmount) * 100;
                 const milestone2_pos_percent = ((projectGoals.phase1 + projectGoals.phase2) / targetAmount) * 100;
                 document.getElementById('timeline-progress-bar').style.width = `${Math.max(0, progressPercentage)}%`;
